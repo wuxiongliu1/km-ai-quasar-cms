@@ -12,9 +12,10 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary   : #1976D2;
-$secondary : #26A69A;
-$accent    : #9C27B0;
+// 清新绿主题色，带透明效果
+$primary   : rgba(76, 175, 80, 0.85);
+$secondary : rgba(129, 199, 132, 0.8);
+$accent    : rgba(67, 160, 71, 0.9);
 
 $dark      : #1D1D1D;
 $dark-page : #121212;

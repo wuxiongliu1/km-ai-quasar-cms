@@ -206,6 +206,11 @@ async function onSubmit() {
   min-height: 100vh;
 }
 
+/* 深色模式 */
+:global(.body--dark) .register-page {
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+}
+
 .register-card {
   width: 100%;
   max-width: 400px;

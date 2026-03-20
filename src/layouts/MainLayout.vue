@@ -17,6 +17,18 @@
           清新绿 CMS
         </q-toolbar-title>
 
+        <!-- 主题切换按钮 -->
+        <q-btn
+          flat
+          round
+          dense
+          :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+          @click="toggleDarkMode"
+          class="q-mr-sm"
+        >
+          <q-tooltip>{{ $q.dark.isActive ? '切换浅色模式' : '切换深色模式' }}</q-tooltip>
+        </q-btn>
+
         <!-- 用户信息 -->
         <div v-if="authStore.isLoggedIn" class="row items-center q-gutter-sm">
           <q-btn flat dense class="q-px-sm">
@@ -82,7 +94,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from 'stores/auth'
@@ -94,6 +106,23 @@ const $q = useQuasar()
 const authStore = useAuthStore()
 
 const leftDrawerOpen = ref(false)
+
+// 初始化主题
+onMounted(() => {
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    $q.dark.set(savedDarkMode === 'true')
+  } else {
+    // 默认跟随系统
+    $q.dark.set('auto')
+  }
+})
+
+// 切换深色/浅色模式
+function toggleDarkMode() {
+  $q.dark.toggle()
+  localStorage.setItem('darkMode', $q.dark.isActive.toString())
+}
 
 // 响应式抽屉字体大小
 const drawerTextClass = computed(() => {
@@ -113,6 +142,12 @@ const linksList = [
     caption: 'Dashboard',
     icon: 'home',
     link: '/'
+  },
+  {
+    title: '图片资源',
+    caption: '管理图片素材',
+    icon: 'image',
+    link: '/images'
   },
   {
     title: '笔记管理',
@@ -179,5 +214,18 @@ function onLogout() {
 .breadcrumb-container {
   padding: 16px 24px 0;
   background-color: transparent;
+}
+
+/* 深色模式适配 */
+:deep(.q-drawer.bg-secondary) {
+  background-color: rgba(129, 199, 132, 0.15) !important;
+}
+
+:deep(.body--dark .q-drawer.bg-secondary) {
+  background-color: rgba(76, 175, 80, 0.2) !important;
+}
+
+:deep(.body--dark .q-header.bg-primary) {
+  background-color: rgba(76, 175, 80, 0.3) !important;
 }
 </style>

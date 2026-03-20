@@ -67,6 +67,26 @@ const routes = [
             { label: '编辑笔记', icon: 'edit' }
           ]
         }
+      },
+      { 
+        path: 'images', 
+        component: () => import('pages/ImageManagePage.vue'),
+        meta: {
+          breadcrumbs: [
+            { label: '首页', icon: 'home', to: '/' },
+            { label: '图片资源管理', icon: 'image' }
+          ]
+        }
+      },
+      { 
+        path: 'test/oss', 
+        component: () => import('pages/OSTestPage.vue'),
+        meta: {
+          breadcrumbs: [
+            { label: '首页', icon: 'home', to: '/' },
+            { label: 'OSS测试', icon: 'bug_report' }
+          ]
+        }
       }
     ]
   },

@@ -1,0 +1,50 @@
+# 依赖目录
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 构建产物
+dist
+.quasar
+
+# 本地环境文件
+.env
+.env.local
+.env.*.local
+
+# IDE 和编辑器
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+logs
+
+# 测试文件
+coverage
+.nyc_output
+
+# Git
+.git
+.gitignore
+
+# Docker 相关文件
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 文档文件
+*.md
+!README.md
+
+# 其他
+*.tar.gz
+*.zip

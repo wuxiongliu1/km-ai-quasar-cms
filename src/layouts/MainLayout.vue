@@ -3,14 +3,7 @@
     <!-- 顶部导航栏 -->
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
 
         <q-toolbar-title>
           <q-icon name="eco" class="q-mr-sm" />
@@ -18,14 +11,8 @@
         </q-toolbar-title>
 
         <!-- 主题切换按钮 -->
-        <q-btn
-          flat
-          round
-          dense
-          :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
-          @click="toggleDarkMode"
-          class="q-mr-sm"
-        >
+        <q-btn flat round dense :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'" @click="toggleDarkMode"
+          class="q-mr-sm">
           <q-tooltip>{{ $q.dark.isActive ? '切换浅色模式' : '切换深色模式' }}</q-tooltip>
         </q-btn>
 
@@ -53,24 +40,14 @@
     </q-header>
 
     <!-- 左侧导航栏抽屉 -->
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      :width="280"
-      class="bg-secondary text-dark"
-      behavior="desktop"
-      elevated
-    >
+    <q-drawer v-model="leftDrawerOpen" show-if-above :width="280" class="bg-secondary text-dark" behavior="desktop"
+      elevated>
       <q-list :class="drawerTextClass">
-        <q-item-label header class="text-weight-bold text-dark" :class="$q.screen.lt.md ? 'text-subtitle1' : 'text-h6'">
+        <!-- <q-item-label header class="text-weight-bold text-dark" :class="$q.screen.lt.md ? 'text-subtitle1' : 'text-h6'">
           导航菜单
-        </q-item-label>
+        </q-item-label> -->
 
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
+        <EssentialLink v-for="link in linksList" :key="link.title" v-bind="link" />
       </q-list>
     </q-drawer>
 
@@ -79,13 +56,8 @@
       <!-- 面包屑导航 - 统一维护在 MainLayout 中 -->
       <div v-if="breadcrumbs.length > 0" class="breadcrumb-container">
         <q-breadcrumbs class="text-grey-7" active-color="primary">
-          <q-breadcrumbs-el
-            v-for="(item, index) in breadcrumbs"
-            :key="index"
-            :label="item.label"
-            :icon="item.icon"
-            :to="item.to"
-          />
+          <q-breadcrumbs-el v-for="(item, index) in breadcrumbs" :key="index" :label="item.label" :icon="item.icon"
+            :to="item.to" />
         </q-breadcrumbs>
       </div>
       <router-view />
@@ -175,7 +147,7 @@ const linksList = [
   }
 ]
 
-function toggleLeftDrawer () {
+function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 

@@ -138,3 +138,113 @@ CrudTable 负责实现这四个方法，不需要外部调用组件实现；
 3. 图片列表管理使用CrudTable组件
 4. 实现上传图片到阿里云oss的方法： uploadToOSS
 5. env配置oss 的参数已经完成，请移除 await simulateUpload(file, onProgress) 的方法，改为正式使用oss的sdk上传文件
+
+## 需求13：部署相关 ✅
+
+1. 实现docker 部署，需要为当前项目生成docker镜像
+
+### 已完成内容
+
+| 文件                      | 说明                                     |
+| ------------------------- | ---------------------------------------- |
+| `Dockerfile`              | 多阶段构建文件，支持 SPA 和 SSR 两种模式 |
+| `.dockerignore`           | Docker 构建忽略文件                      |
+| `docker-compose.yml`      | Docker Compose 编排文件                  |
+| `docker/nginx.conf`       | Nginx 配置文件（SPA 模式）               |
+| `docker/nginx-proxy.conf` | Nginx 反向代理配置（SSR 模式）           |
+| `DEPLOY.md`               | 详细的部署文档                           |
+
+### 快速部署
+
+```bash
+# SPA 模式（推荐）
+docker-compose up -d cms-spa
+
+# SSR 模式
+docker-compose up -d cms-ssr
+
+# 访问 http://localhost
+```
+
+详见 `DEPLOY.md`
+
+## 需求14：文件上传代码优化 ✅
+
+1. 面向接口编程，可支持阿里云oss和supbase的storage 两种存储切换
+2. 新增supbase的文件上传功能
+3. 当前文件上传功能的实现使用supbase
+
+### 已完成内容
+
+| 文件                                       | 说明                                                             |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| `src/services/storage/StorageInterface.js` | 存储服务接口定义，定义了 upload/uploadBatch/delete/getUrl 等方法 |
+| `src/services/storage/AliyunOSSStorage.js` | 阿里云 OSS 存储适配器                                            |
+| `src/services/storage/SupabaseStorage.js`  | Supabase Storage 适配器（默认）                                  |
+| `src/services/storage/StorageFactory.js`   | 存储服务工厂，支持通过配置切换存储类型                           |
+| `src/services/storage/index.js`            | 统一导出                                                         |
+| `src/components/ImageUploader.vue`         | 更新使用新的存储服务                                             |
+
+### 快速配置
+
+```env
+# 存储类型: supabase | aliyun-oss
+VITE_STORAGE_TYPE=supabase
+
+# Supabase Storage Bucket 名称
+VITE_SUPABASE_STORAGE_BUCKET=images
+```
+
+### 使用示例
+
+```javascript
+// 使用默认存储（根据环境变量）
+import { StorageFactory } from 'src/services/storage'
+const storage = StorageFactory.getDefault()
+
+// 指定存储类型
+const ossStorage = StorageFactory.create('aliyun-oss')
+const supabaseStorage = StorageFactory.create('supabase')
+
+// 上传文件
+const result = await storage.upload(file, {
+  category: 'product',
+  onProgress: (percent) => console.log(`${percent}%`),
+})
+```
+
+详见 `src/services/storage/README.md`
+
+## 需求15：图片上传逻辑优化 ✅
+
+1. 当前图片上传之后，上传的图片信息未录入到 images 数据表中
+2. 图片上传之后，需要刷新 图片资源列表，以展示最新上传的图片
+
+### 已完成内容
+
+| 文件                               | 修改内容                                                                                                 |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `src/components/ImageUploader.vue` | 新增 `saveImageToDatabase()` 方法，上传成功后自动将图片信息保存到 images 表；新增 `upload-complete` 事件 |
+| `src/pages/ImageManagePage.vue`    | 监听 `upload-complete` 事件，上传完成后自动刷新图片列表                                                  |
+
+### 实现逻辑
+
+1. **上传文件** → 存储到 Supabase Storage / 阿里云 OSS
+2. **保存信息** → 调用 `/api/images/_create` 将图片元数据保存到数据库
+3. **刷新列表** → 触发 `upload-complete` 事件，父组件刷新 CrudTable
+
+### 流程图
+
+```
+用户上传图片
+    ↓
+Storage 上传成功
+    ↓
+保存到 images 表 (name, category, url, size, createTime)
+    ↓
+触发 upload-complete 事件
+    ↓
+ImageManagePage 刷新列表
+    ↓
+展示新上传的图片
+```

@@ -163,11 +163,99 @@ import { SHA256 } from 'crypto-js'
 const hashedPassword = SHA256('your-password').toString()
 ```
 
-## 5. 配置 Row Level Security (RLS)
+## 5. 配置 Storage (文件存储)
+
+### 5.1 创建 Storage Bucket
+
+在 Supabase 控制台的 Storage 页面，创建一个名为 `images` 的 bucket：
+
+1. 进入 Supabase 控制台 → Storage
+2. 点击 "New bucket"
+3. 输入名称：`images`
+4. 取消勾选 "Restrict public access"（允许公共访问）
+5. 点击 "Save"
+
+或者使用 SQL 创建：
+
+```sql
+-- 创建 bucket（通过 storage.buckets 表）
+INSERT INTO storage.buckets (id, name, public) VALUES ('images', 'images', true);
+```
+
+### 5.2 配置 Storage RLS 策略
+
+**重要**：如果不配置 RLS 策略，文件上传会报错 "new row violates row-level security policy"。
+
+在 Supabase 控制台的 Storage → Policies 页面，为 `images` bucket 添加以下策略：
+
+#### 策略 1: 允许所有人查看文件
+
+- **Name**: Allow public read
+- **Allowed operation**: SELECT
+- **Target roles**: anon, authenticated
+- **Policy definition**: `true`
+
+#### 策略 2: 允许认证用户上传文件
+
+- **Name**: Allow authenticated upload
+- **Allowed operation**: INSERT
+- **Target roles**: authenticated
+- **Policy definition**: `true`
+
+#### 策略 3: 允许认证用户更新文件
+
+- **Name**: Allow authenticated update
+- **Allowed operation**: UPDATE
+- **Target roles**: authenticated
+- **Policy definition**: `true`
+
+#### 策略 4: 允许认证用户删除文件
+
+- **Name**: Allow authenticated delete
+- **Allowed operation**: DELETE
+- **Target roles**: authenticated
+- **Policy definition**: `true`
+
+或者使用 SQL 创建策略：
+
+```sql
+-- 允许所有人查看（SELECT）
+CREATE POLICY "Allow public read" ON storage.objects
+  FOR SELECT TO anon, authenticated USING (bucket_id = 'images');
+
+-- 允许认证用户上传（INSERT）
+CREATE POLICY "Allow authenticated upload" ON storage.objects
+  FOR INSERT TO anon,authenticated WITH CHECK (bucket_id = 'images');
+
+-- 允许认证用户更新（UPDATE）
+CREATE POLICY "Allow authenticated update" ON storage.objects
+  FOR UPDATE TO anon,authenticated USING (bucket_id = 'images') WITH CHECK (bucket_id = 'images');
+
+-- 允许认证用户删除（DELETE）
+CREATE POLICY "Allow authenticated delete" ON storage.objects
+  FOR DELETE TO anon,authenticated USING (bucket_id = 'images');
+```
+
+### 5.3 验证 Storage 配置
+
+在浏览器控制台测试：
+
+```javascript
+// 检查 bucket 是否存在
+const { data: buckets } = await supabase.storage.listBuckets()
+console.log('Buckets:', buckets)
+
+// 测试上传（需要选择文件）
+const file = new File(['test'], 'test.txt', { type: 'text/plain' })
+const { data, error } = await supabase.storage.from('images').upload('test.txt', file)
+console.log(data, error)
+```
+
+## 6. 配置数据表 RLS
 
 上述 SQL 中已启用 RLS 并设置了允许所有访问的策略。在生产环境中，建议根据实际需求设置更严格的访问策略。
 
-## 6. 验证连接
+## 7. 验证连接
 
 启动开发服务器：
 
@@ -183,32 +271,63 @@ npm run dev
 4. 笔记管理 CRUD
 5. 图片管理 CRUD
 
-## 7. 故障排除
+## 8. 故障排除
 
-### 7.1 连接失败
+### 8.1 连接失败
 
 - 检查 `.env` 文件中的 Supabase URL 和 Anon Key 是否正确
 - 检查网络连接
 
-### 7.2 查询失败
+### 8.2 查询失败
 
 - 检查表名是否正确（区分大小写）
 - 检查字段名是否为下划线命名（snake_case）
 - 检查 RLS 策略是否正确配置
 - 查看浏览器控制台和 Supabase 日志
 
-### 7.3 字段名不匹配
+### 8.3 字段名不匹配
 
 如果看到字段值为空或 undefined，请检查：
 
 1. 数据库字段是否为下划线命名（如 `create_time`）
 2. API 服务层的字段转换是否正常工作
 
-### 7.4 CORS 错误
+### 8.4 CORS 错误
 
 - 在 Supabase 项目的 Settings > API > Cors Origins 中添加你的开发服务器地址（如 `http://localhost:9000`）
 
-## 8. 从 Mock 数据迁移
+### 8.5 Storage 上传报错 "new row violates row-level security policy"
+
+这是最常见的 Storage 错误，表示没有正确配置 RLS 策略。
+
+**快速修复**：
+
+1. 登录 Supabase 控制台
+2. 进入 Storage → Policies
+3. 选择 `images` bucket
+4. 点击 "New Policy" → "Get started quickly"
+5. 选择 "Allow read access to everyone" 和 "Allow write access to authenticated users only"
+6. 保存
+
+或者使用 SQL 快速修复：
+
+```sql
+-- 允许所有人读取
+CREATE POLICY "Allow public read" ON storage.objects
+  FOR SELECT TO anon, authenticated USING (bucket_id = 'images');
+
+-- 允许认证用户上传（包括插入和更新）
+CREATE POLICY "Allow authenticated insert" ON storage.objects
+  FOR INSERT TO authenticated WITH CHECK (bucket_id = 'images');
+
+-- 允许认证用户删除
+CREATE POLICY "Allow authenticated delete" ON storage.objects
+  FOR DELETE TO authenticated USING (bucket_id = 'images');
+```
+
+**注意**：如果你使用匿名用户（未登录）上传文件，需要将 `TO authenticated` 改为 `TO anon, authenticated`。
+
+## 9. 从 Mock 数据迁移
 
 如果需要将现有的 localStorage mock 数据迁移到 Supabase：
 

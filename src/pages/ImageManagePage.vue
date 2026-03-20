@@ -10,7 +10,7 @@
 
       <!-- 上传区域 -->
       <q-card-section>
-        <ImageUploader ref="uploaderRef" @upload-success="onUploadSuccess" @upload-error="onUploadError" />
+        <ImageUploader ref="uploaderRef" @upload-success="onUploadSuccess" @upload-error="onUploadError" @upload-complete="onUploadComplete" />
       </q-card-section>
 
       <q-separator />
@@ -213,8 +213,12 @@ function downloadImage(image) {
 
 // 上传成功回调
 function onUploadSuccess(result) {
-  // 刷新列表
   console.log('上传成功:', result)
+}
+
+// 上传完成回调（成功或失败都会触发，用于刷新列表）
+function onUploadComplete() {
+  // 刷新图片列表，展示最新上传的图片
   crudTableRef.value?.refresh()
 }
 

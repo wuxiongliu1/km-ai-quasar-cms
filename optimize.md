@@ -41,6 +41,38 @@ import {
 
 ---
 
+### Bug: Supabase Storage RLS 策略错误
+
+**问题描述**:
+文件上传时报错：
+```
+new row violates row-level security policy
+```
+
+**根本原因**:
+Supabase Storage 的 bucket 需要单独配置 RLS 策略，与数据库表的 RLS 是分开的。默认情况下 Storage 没有写入权限。
+
+**修复方案**:
+1. 在 Supabase 控制台创建 bucket 时设置为 public
+2. 在 Storage → Policies 中添加 INSERT、SELECT、DELETE 策略
+3. 更新 `SUPABASE_SETUP.md` 文档，添加详细的 Storage RLS 配置说明
+4. 在 `SupabaseStorage.js` 中添加更清晰的错误提示信息
+
+**SQL 快速修复**：
+```sql
+-- 允许所有人读取
+CREATE POLICY "Allow public read" ON storage.objects
+  FOR SELECT TO anon, authenticated USING (bucket_id = 'images');
+
+-- 允许认证用户上传
+CREATE POLICY "Allow authenticated upload" ON storage.objects
+  FOR INSERT TO authenticated WITH CHECK (bucket_id = 'images');
+```
+
+**修复时间**: 2026-03-20
+
+---
+
 ### Bug: 数据库字段名与前端字段名不一致
 
 **问题描述**:
@@ -106,8 +138,9 @@ import {
 | **需求六** | 笔记管理页面 | ✅ **已完成** | 存在 `NoteListPage.vue` (预期基于 CrudTable) 以及 `NoteEditPage.vue` (独立的 Markdown 编排页)。 |
 | **需求七** | 登录注册功能 | ✅ **已完成** | `LoginPage.vue` 和 `RegisterPage.vue` 实现完好，风格统一。登录/注册包含所需字段（用户名、邮箱、密码），密码使用了 Base64 (`btoa`) 进行"加密"传输。 |
 | **需求八** | 样式优化 | ✅ **已完成** | `MainLayout.vue` 的模板里配置抽屉宽度为 `260` (增加了20px)，且 `style` 标签内加入了针对不同分辨率的字体响应式大小 (`@media` min-width)。 |
-
----
+| **需求13** | Docker 部署 | ✅ **已完成** | 已创建 `Dockerfile`（支持 SPA/SSR 多阶段构建）、`docker-compose.yml`、Nginx 配置及详细部署文档 `DEPLOY.md`。 |
+| **需求14** | 文件上传优化 | ✅ **已完成** | 已实现面向接口编程的存储服务，支持阿里云 OSS 和 Supabase Storage 两种存储切换。默认使用 Supabase。详见 `src/services/storage/README.md`。 |
+| **需求15** | 图片上传逻辑优化 | ✅ **已完成** | 上传成功后自动将图片信息保存到 images 数据表，并刷新图片资源列表展示最新上传的图片。 |---
 
 ## 3. Supabase 迁移说明
 

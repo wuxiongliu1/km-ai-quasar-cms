@@ -92,7 +92,7 @@ export class SupabaseStorage extends StorageInterface {
         size: file.size,
         category,
         type: file.type,
-        uploadTime: new Date().toLocaleString(),
+        uploadTime: new Date().toISOString(),
       }
     } catch (error) {
       console.error('Supabase 上传失败:', error)

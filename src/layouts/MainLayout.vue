@@ -79,7 +79,7 @@ const authStore = useAuthStore()
 
 const leftDrawerOpen = ref(false)
 
-// 初始化主题
+// 初始化主题和侧边栏状态
 onMounted(() => {
   const savedDarkMode = localStorage.getItem('darkMode')
   if (savedDarkMode !== null) {
@@ -88,6 +88,8 @@ onMounted(() => {
     // 默认跟随系统
     $q.dark.set('auto')
   }
+  // 移动端下默认收起侧边栏
+  leftDrawerOpen.value = !$q.screen.lt.md
 })
 
 // 切换深色/浅色模式
@@ -138,6 +140,30 @@ const linksList = [
     caption: '管理用户信息',
     icon: 'people',
     link: '/users'
+  },
+  {
+    title: '数据源管理',
+    caption: '管理数据库连接',
+    icon: 'storage',
+    link: '/data-sources'
+  },
+  {
+    title: 'SQL XML 管理',
+    caption: '管理 SQL 语句配置',
+    icon: 'code',
+    link: '/sql-xml'
+  },
+  {
+    title: 'sqlPath 测试',
+    caption: '执行并调试 sqlPath',
+    icon: 'science',
+    link: '/sqlpath-test'
+  },
+  {
+    title: '公众号发布',
+    caption: '发布到微信公众号',
+    icon: 'chat',
+    link: '/wechat-publish'
   },
   {
     title: '系统设置',

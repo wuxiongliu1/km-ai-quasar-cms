@@ -281,7 +281,7 @@ async function saveImageToDatabase(uploadResult) {
     category: uploadResult.category || defaultCategory.value,
     url: uploadResult.url,
     size: uploadResult.size,
-    createTime: new Date().toLocaleString()
+    createTime: new Date().toISOString()
   }
   
   // 调用 API 保存到 images 表

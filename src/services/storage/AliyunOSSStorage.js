@@ -98,7 +98,7 @@ export class AliyunOSSStorage extends StorageInterface {
         category,
         type: file.type,
         etag: result.etag,
-        uploadTime: new Date().toLocaleString(),
+        uploadTime: new Date().toISOString(),
       }
     } catch (error) {
       console.error('OSS 上传失败:', error)

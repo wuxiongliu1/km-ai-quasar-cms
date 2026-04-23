@@ -1,13 +1,7 @@
 import { defineBoot } from '#q-app/wrappers'
 import { api } from './axios'
-import { 
-  login, 
-  register, 
-  query, 
-  create, 
-  update, 
-  remove 
-} from '../services/api.js'
+import { login, register, query, create, update, remove } from '../services/api.js'
+import { matchDynamicSqlAdminRoute } from '../services/dynamicSqlAdminMock.js'
 
 // 模拟网络延迟
 const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms))
@@ -111,15 +105,29 @@ const mockHandlers = {
   'POST:/api/images/_delete': async (data) => {
     await delay()
     return await remove('images', data)
+  },
+  
+  // 微信公众号发布 mock
+  'POST:/api/wechat/publish': async () => {
+    await delay(800)
+    return {
+      success: true,
+      message: '模拟发布成功',
+      mediaId: 'MOCK_MEDIA_' + Date.now()
+    }
   }
 }
 
 export default defineBoot(() => {
+  if (import.meta.env.VITE_ENABLE_MOCK !== 'true') {
+    return
+  }
+
   // 添加请求拦截器
   api.interceptors.request.use(
     async (config) => {
       const key = `${config.method.toUpperCase()}:${config.url}`
-      const handler = mockHandlers[key]
+      const handler = mockHandlers[key] || matchDynamicSqlAdminRoute(config.method, config.url)
       
       if (handler) {
         // 构造 mock 响应
@@ -185,4 +193,10 @@ export default defineBoot(() => {
   console.log('  - POST /api/contents/_query, _create, _update, _delete')
   console.log('  - POST /api/notes/_query, _create, _update, _delete')
   console.log('  - POST /api/images/_query, _create, _update, _delete')
+  console.log('  - GET/POST /api/datasources, GET /api/datasources/:id')
+  console.log('  - POST /api/datasources/:id/enable, /disable, /test')
+  console.log('  - GET/POST /api/dynamic-sql/definitions, GET /api/dynamic-sql/definitions/:id')
+  console.log('  - PUT /api/dynamic-sql/definitions/:id/versions')
+  console.log('  - POST /api/dynamic-sql/definitions/:id/submit-review, /publish, /disable')
+  console.log('  - POST /api/wechat/publish')
 })

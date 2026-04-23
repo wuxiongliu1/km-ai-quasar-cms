@@ -168,7 +168,7 @@ docker-compose up -d cms-ssr
 
 详见 `DEPLOY.md`
 
-## 需求14：文件上传代码优化 ✅
+## 需求14：文件上传代码优化 ✅【已完成】
 
 1. 面向接口编程，可支持阿里云oss和supbase的storage 两种存储切换
 2. 新增supbase的文件上传功能
@@ -215,7 +215,7 @@ const result = await storage.upload(file, {
 
 详见 `src/services/storage/README.md`
 
-## 需求15：图片上传逻辑优化 ✅
+## 需求15：图片上传逻辑优化 ✅【已完成】
 
 1. 当前图片上传之后，上传的图片信息未录入到 images 数据表中
 2. 图片上传之后，需要刷新 图片资源列表，以展示最新上传的图片
@@ -247,4 +247,91 @@ Storage 上传成功
 ImageManagePage 刷新列表
     ↓
 展示新上传的图片
+```
+
+## 需求14：数据源管理 ✅【已完成】
+
+1. 新增数据库数据源管理，基于CrudTable组件
+2. 数据库数据源需要覆盖主流的数据库配置：mysql， postgress， clickhouse
+
+### 已完成内容
+
+| 文件                           | 说明                                             |
+| ------------------------------ | ------------------------------------------------ |
+| `src/pages/DataSourcePage.vue` | 数据源管理页面，支持 MySQL/PostgreSQL/ClickHouse |
+| `src/router/routes.js`         | 添加数据源管理路由 `/data-sources`               |
+| `src/layouts/MainLayout.vue`   | 添加导航菜单项                                   |
+| `src/boot/mock.js`             | 添加数据源管理 mock API                          |
+| `src/services/api.js`          | 添加数据源表名映射                               |
+| `SUPABASE_SETUP.md`            | 添加 dataSources 表创建 SQL                      |
+
+### 功能特性
+
+- 支持的数据库类型：MySQL、PostgreSQL、ClickHouse
+- 字段包括：名称、类型、主机、端口、数据库名、用户名、密码、描述、状态
+- 支持连接测试功能
+- 使用 CrudTable 组件，支持完整的 CRUD 操作
+
+---
+
+## 需求15：接口功能sql xml管理 ✅【已完成】
+
+1. 接口功能的sql xml管理，基于CrudTable组件
+2. 该sql xml 需要和数据源关联
+3. 该sql xml需要至少包含如下字段： sqlPath ，sql, dataSourceId
+
+### 已完成内容
+
+| 文件                         | 说明                                           |
+| ---------------------------- | ---------------------------------------------- |
+| `src/pages/SqlXmlPage.vue`   | SQL XML 管理页面，支持 SQL 编辑和执行          |
+| `src/router/routes.js`       | 添加 SQL XML 管理路由 `/sql-xml`               |
+| `src/layouts/MainLayout.vue` | 添加导航菜单项                                 |
+| `src/boot/mock.js`           | 添加 SQL XML 管理 mock API，自动关联数据源名称 |
+| `src/services/api.js`        | 添加 SQL XML 表名映射                          |
+| `SUPABASE_SETUP.md`          | 添加 sqlXmls 表创建 SQL                        |
+
+### 功能特性
+
+- SQL 路径管理（格式：namespace.sqlId）
+- SQL 语句编辑（多行文本框）
+- 数据源关联选择
+- 自动显示数据源名称
+- SQL 预览和执行功能
+- 使用 CrudTable 组件，支持完整的 CRUD 操作
+
+### 数据库表结构
+
+**dataSources 表**：
+
+```sql
+CREATE TABLE dataSources (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,        -- 数据源名称
+  type TEXT NOT NULL,        -- 数据库类型 (mysql/postgresql/clickhouse)
+  host TEXT NOT NULL,        -- 主机地址
+  port INTEGER NOT NULL,     -- 端口
+  database TEXT NOT NULL,    -- 数据库名
+  username TEXT NOT NULL,    -- 用户名
+  password TEXT NOT NULL,    -- 密码
+  description TEXT,          -- 描述
+  status TEXT,               -- 状态 (active/inactive)
+  create_time TEXT,
+  update_time TEXT
+);
+```
+
+**sqlXmls 表**：
+
+```sql
+CREATE TABLE sqlXmls (
+  id SERIAL PRIMARY KEY,
+  sql_path TEXT NOT NULL,    -- SQL 路径
+  sql TEXT NOT NULL,         -- SQL 语句
+  data_source_id INTEGER,    -- 关联的数据源 ID
+  data_source_name TEXT,     -- 数据源名称（冗余存储）
+  description TEXT,          -- 描述
+  create_time TEXT,
+  update_time TEXT
+);
 ```

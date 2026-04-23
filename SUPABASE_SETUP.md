@@ -120,17 +120,74 @@ ALTER TABLE images ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all" ON images FOR ALL USING (true) WITH CHECK (true);
 ```
 
+### 2.5 数据源表 (dataSources)
+
+```sql
+CREATE TABLE dataSources (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  host TEXT NOT NULL,
+  port INTEGER NOT NULL,
+  database TEXT NOT NULL,
+  username TEXT NOT NULL,
+  password TEXT NOT NULL,
+  description TEXT,
+  status TEXT DEFAULT 'active',
+  create_time TEXT,
+  update_time TEXT
+);
+
+-- 创建索引
+CREATE INDEX idx_dataSources_type ON dataSources(type);
+CREATE INDEX idx_dataSources_status ON dataSources(status);
+
+-- 启用 RLS
+ALTER TABLE dataSources ENABLE ROW LEVEL SECURITY;
+
+-- 创建访问策略
+CREATE POLICY "Allow all" ON dataSources FOR ALL USING (true) WITH CHECK (true);
+```
+
+### 2.6 SQL XML 表 (sqlXmls)
+
+```sql
+CREATE TABLE sqlXmls (
+  id SERIAL PRIMARY KEY,
+  sql_path TEXT NOT NULL,
+  sql TEXT NOT NULL,
+  data_source_id INTEGER NOT NULL,
+  data_source_name TEXT,
+  description TEXT,
+  create_time TEXT,
+  update_time TEXT
+);
+
+-- 创建索引
+CREATE INDEX idx_sqlXmls_dataSourceId ON sqlXmls(data_source_id);
+CREATE INDEX idx_sqlXmls_sqlPath ON sqlXmls(sql_path);
+
+-- 启用 RLS
+ALTER TABLE sqlXmls ENABLE ROW LEVEL SECURITY;
+
+-- 创建访问策略
+CREATE POLICY "Allow all" ON sqlXmls FOR ALL USING (true) WITH CHECK (true);
+```
+
 ## 3. 字段名映射说明
 
 前端代码使用 **驼峰命名（camelCase）**，数据库使用 **下划线命名（snake_case）**。API 服务层会自动进行转换：
 
-| 前端字段 (camelCase) | 数据库字段 (snake_case) | 说明     |
-| -------------------- | ----------------------- | -------- |
-| `createTime`         | `create_time`           | 创建时间 |
-| `updateTime`         | `update_time`           | 更新时间 |
-| `isPublic`           | `is_public`             | 是否公开 |
-| `publishDate`        | `publish_date`          | 发布日期 |
-| `viewCount`          | `view_count`            | 浏览量   |
+| 前端字段 (camelCase) | 数据库字段 (snake_case) | 说明           |
+| -------------------- | ----------------------- | -------------- |
+| `createTime`         | `create_time`           | 创建时间       |
+| `updateTime`         | `update_time`           | 更新时间       |
+| `isPublic`           | `is_public`             | 是否公开       |
+| `publishDate`        | `publish_date`          | 发布日期       |
+| `viewCount`          | `view_count`            | 浏览量         |
+| `sqlPath`            | `sql_path`              | SQL 路径       |
+| `dataSourceId`       | `data_source_id`        | 数据源 ID      |
+| `dataSourceName`     | `data_source_name`      | 数据源名称     |
 
 ## 4. 插入初始数据（可选）
 
@@ -154,6 +211,18 @@ INSERT INTO notes (title, category, tags, summary, content, is_public, create_ti
 -- 插入测试图片
 INSERT INTO images (name, category, url, size, create_time) VALUES
 ('产品主图1.jpg', 'product', 'https://picsum.photos/400/400?random=1', 204800, '2024-01-15 10:30:00');
+
+-- 插入测试数据源
+INSERT INTO dataSources (name, type, host, port, database, username, password, description, status, create_time) VALUES
+('本地 MySQL', 'mysql', 'localhost', 3306, 'test_db', 'root', 'password123', '本地测试数据库', 'active', '2024-01-15 10:30:00'),
+('生产 PostgreSQL', 'postgresql', 'db.example.com', 5432, 'production', 'admin', 'secure_pass', '生产环境数据库', 'active', '2024-02-20 14:20:00'),
+('分析 ClickHouse', 'clickhouse', 'analytics.example.com', 8123, 'analytics', 'analytics', 'ch_password', '数据分析用', 'active', '2024-03-10 09:15:00');
+
+-- 插入测试 SQL XML
+INSERT INTO sqlXmls (sql_path, sql, data_source_id, data_source_name, description, create_time) VALUES
+('user.selectById', 'SELECT * FROM users WHERE id = #{id}', 1, '本地 MySQL', '根据ID查询用户', '2024-01-16 11:00:00'),
+('user.selectList', 'SELECT * FROM users WHERE status = #{status} ORDER BY create_time DESC', 1, '本地 MySQL', '查询用户列表', '2024-01-16 11:30:00'),
+('report.dailyStats', 'SELECT date, count(*) as total FROM events GROUP BY date ORDER BY date', 3, '分析 ClickHouse', '每日数据统计', '2024-03-11 10:00:00');
 ```
 
 注意：密码需要使用 SHA256 加密，可以使用以下 JavaScript 代码生成：
@@ -270,6 +339,8 @@ npm run dev
 3. 内容管理 CRUD
 4. 笔记管理 CRUD
 5. 图片管理 CRUD
+6. 数据源管理 CRUD
+7. SQL XML 管理 CRUD
 
 ## 8. 故障排除
 

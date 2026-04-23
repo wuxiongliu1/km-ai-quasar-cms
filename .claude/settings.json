@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      
+    ]
+  },
+  "permissions": {
+      "allow": [
+        "Bash",
+        "Agent",
+        "Read",
+        "Edit",
+        "Write"
+      ]
+    }
+}

@@ -319,7 +319,9 @@ const pathToTableMap = {
   '/api/users': 'users',
   '/api/contents': 'contents',
   '/api/notes': 'notes',
-  '/api/images': 'images'
+  '/api/images': 'images',
+  '/api/dataSources': 'dataSources',
+  '/api/sqlXmls': 'sqlXmls'
 }
 
 /**

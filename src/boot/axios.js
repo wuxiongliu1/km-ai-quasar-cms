@@ -9,7 +9,7 @@ import { Notify } from 'quasar'
 // "export default () => {}" function below (which runs individually
 // for each client)
 const api = axios.create({ 
-  baseURL: process.env.API_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || process.env.API_URL || '/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
@@ -18,7 +18,27 @@ const api = axios.create({
 
 // 添加响应拦截器处理全局错误
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // 兼容 km-java 的统一响应体：{ success, code, message, data }
+    if (
+      response?.data &&
+      typeof response.data === 'object' &&
+      Object.prototype.hasOwnProperty.call(response.data, 'success') &&
+      Object.prototype.hasOwnProperty.call(response.data, 'data')
+    ) {
+      return {
+        ...response,
+        data: response.data.data,
+        apiMeta: {
+          success: response.data.success,
+          code: response.data.code,
+          message: response.data.message
+        }
+      }
+    }
+
+    return response
+  },
   (error) => {
     // 忽略 mock 成功产生的 reject (由于我们的 mock 实现机制)
     if (error && error.__isMock && !error.response) {

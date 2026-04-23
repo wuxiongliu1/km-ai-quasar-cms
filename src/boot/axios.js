@@ -8,7 +8,7 @@ import { Notify } from 'quasar'
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ 
+const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || process.env.API_URL || '/api',
   timeout: 30000,
   headers: {
@@ -44,7 +44,7 @@ api.interceptors.response.use(
     if (error && error.__isMock && !error.response) {
       return Promise.reject(error)
     }
-    
+
     Notify.create({
       type: 'negative',
       message: error.response?.data?.message || error.message || '请求失败'

@@ -88,33 +88,44 @@ const routes = [
           ]
         }
       },
-      { 
-        path: 'data-sources', 
-        component: () => import('pages/DataSourcePage.vue'),
+      {
+        path: 'sql-configs',
+        component: () => import('pages/SqlConfigPage.vue'),
         meta: {
           breadcrumbs: [
             { label: '首页', icon: 'home', to: '/' },
-            { label: '数据源管理', icon: 'storage' }
+            { label: 'SQL 配置目录', icon: 'folder' }
           ]
         }
       },
       {
-        path: 'sql-xml',
-        component: () => import('pages/SqlXmlPage.vue'),
+        path: 'sql-configs/list/:folderKey(.*)',
+        component: () => import('pages/SqlConfigListPage.vue'),
         meta: {
           breadcrumbs: [
             { label: '首页', icon: 'home', to: '/' },
-            { label: 'SQL XML 管理', icon: 'code' }
+            { label: 'SQL 配置目录', icon: 'folder', to: '/sql-configs' },
+            { label: 'sqlPath 列表', icon: 'code' }
           ]
         }
       },
       {
-        path: 'sqlpath-test',
-        component: () => import('pages/SqlPathTestPage.vue'),
+        path: 'datasource-configs',
+        component: () => import('pages/DatasourceConfigPage.vue'),
         meta: {
           breadcrumbs: [
             { label: '首页', icon: 'home', to: '/' },
-            { label: 'sqlPath 测试', icon: 'science' }
+            { label: '数据源配置', icon: 'storage' }
+          ]
+        }
+      },
+      {
+        path: 'sql-console',
+        component: () => import('pages/SqlConsolePage.vue'),
+        meta: {
+          breadcrumbs: [
+            { label: '首页', icon: 'home', to: '/' },
+            { label: 'SQL 调试台', icon: 'terminal' }
           ]
         }
       },

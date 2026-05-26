@@ -17,7 +17,12 @@
         </q-btn>
 
         <!-- 用户信息 -->
-        <div v-if="authStore.isLoggedIn" class="row items-center q-gutter-sm">
+        <div v-if="authStore.authDisabled" class="row items-center q-gutter-sm">
+          <q-chip color="white" text-color="primary" dense square icon="vpn_key_off">
+            免登录模式
+          </q-chip>
+        </div>
+        <div v-else-if="authStore.isLoggedIn" class="row items-center q-gutter-sm">
           <q-btn flat dense class="q-px-sm">
             <q-avatar icon="account_circle" size="32px" />
             <span class="q-ml-sm">{{ authStore.username }}</span>
@@ -142,22 +147,22 @@ const linksList = [
     link: '/users'
   },
   {
-    title: '数据源管理',
-    caption: '管理数据库连接',
-    icon: 'storage',
-    link: '/data-sources'
-  },
-  {
-    title: 'SQL XML 管理',
-    caption: '管理 SQL 语句配置',
+    title: 'SQL 配置',
+    caption: '管理 SQL 接口模板',
     icon: 'code',
-    link: '/sql-xml'
+    link: '/sql-configs'
   },
   {
-    title: 'sqlPath 测试',
-    caption: '执行并调试 sqlPath',
-    icon: 'science',
-    link: '/sqlpath-test'
+    title: '数据源配置',
+    caption: '管理数据源连接',
+    icon: 'storage',
+    link: '/datasource-configs'
+  },
+  {
+    title: 'SQL 调试台',
+    caption: '执行与刷新 sqlPath',
+    icon: 'terminal',
+    link: '/sql-console'
   },
   {
     title: '公众号发布',

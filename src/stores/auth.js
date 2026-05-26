@@ -2,18 +2,35 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from 'boot/axios'
 
+const AUTH_DISABLED = true
+
 export const useAuthStore = defineStore('auth', () => {
   // State
   const token = ref(localStorage.getItem('token') || '')
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 
   // Getters
-  const isLoggedIn = computed(() => !!token.value)
-  const username = computed(() => user.value?.username || '')
+  const isLoggedIn = computed(() => AUTH_DISABLED || !!token.value)
+  const username = computed(() => {
+    if (AUTH_DISABLED) {
+      return '免登录模式'
+    }
+
+    return user.value?.username || ''
+  })
 
   // Actions
   // 登录
   async function login(credentials) {
+    if (AUTH_DISABLED) {
+      return {
+        token: '',
+        user: {
+          username: '免登录模式'
+        }
+      }
+    }
+
     const response = await api.post('/api/auth/login', credentials)
     const { token: newToken, user: userInfo } = response.data
     
@@ -32,12 +49,22 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 注册
   async function register(userData) {
+    if (AUTH_DISABLED) {
+      return {
+        success: true
+      }
+    }
+
     const response = await api.post('/api/auth/register', userData)
     return response.data
   }
 
   // 退出登录
   function logout() {
+    if (AUTH_DISABLED) {
+      return
+    }
+
     token.value = ''
     user.value = null
     
@@ -51,12 +78,18 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 初始化（检查本地存储的登录状态）
   function init() {
+    if (AUTH_DISABLED) {
+      delete api.defaults.headers.common['Authorization']
+      return
+    }
+
     if (token.value) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
     }
   }
 
   return {
+    authDisabled: AUTH_DISABLED,
     token,
     user,
     isLoggedIn,
